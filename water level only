@@ -1,0 +1,65 @@
+
+
+const int trigPin = 2;
+const int echoPin = 4;
+
+void setup() { 
+Serial.begin(9600);} 
+void loop()
+{
+long duration, distance;
+pinMode(trigPin, OUTPUT); 
+digitalWrite(trigPin, LOW); 
+delayMicroseconds(2); 
+digitalWrite(trigPin, HIGH); 
+delayMicroseconds(10); 
+digitalWrite(trigPin, LOW);
+pinMode(echoPin, INPUT); 
+duration = pulseIn(echoPin, HIGH);
+ 
+distance = microsecondsToCentimeters(duration);
+
+if(  (distance > 0) && (distance <= 5)   ) 
+{
+  Serial.print("100%");
+} else
+if(  (distance > 5) && (distance <= 10)  ) 
+{
+ Serial.print("80%");
+ 
+} else
+ 
+if(  (distance > 10) && (distance <= 15)  ) 
+{
+ 
+Serial.print("60%");
+} else
+ 
+if(  (distance > 15) && (distance <= 20)  ) 
+{
+ 
+  Serial.print("40%");
+} else
+ 
+if(  (distance > 20) && (distance <= 25)  ) 
+{
+ 
+  Serial.print("20%");
+} else
+ 
+if(  distance > 25 ) 
+{
+ 
+  Serial.print("0%");
+} 
+
+
+delay(10000);
+
+
+
+}
+
+
+long microsecondsToCentimeters(long microseconds)
+{return microseconds / 29 / 2;}
