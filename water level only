@@ -66,6 +66,7 @@ long microsecondsToCentimeters(long microseconds)
 
 
 ### Pressure sensor
+
 #include <Wire.h> // so we can use I2C communication
 #define MYALTITUDE 262 //define altitude at your location to
 calculate mean sea level pressure in meters
