@@ -1,52 +1,415 @@
+//Including necessary libraries
+#include <LiquidCrystal_I2C.h>
+#include <Wire.h>
 
-#include <LiquidCrystal.h>
-#define trigPin 7
-#define echoPin 6
+//////MPRLS 25PSI SENSOR
 
-long duration;
-int distance;
+#include <Adafruit_MPRLS.h>
+#define RESET_PIN  -1 
+#define EOC_PIN    -1  
+Adafruit_MPRLS mpr = Adafruit_MPRLS(RESET_PIN, EOC_PIN);
 
-long distancein;
-const int RS = 12, EN = 11, D7 = 2, D6 = 3, D5 =4, D4 = 5;
+LiquidCrystal_I2C lcd(0x27, 16, 2);
 
-LiquidCrystal lcd(RS,EN,D4,D5,D6,D7);
+///////ULTRASONIC SENSOR
 
+#include <NewPing.h>
+#include<UltraDistSensor.h>
+UltraDistSensor mysensor;
+float reading;
+float reading_percentage;
+//////// BUTTONS
+
+int upButton = 2;
+int downButton = 3;
+int selectButton = 4;
+int menu = 1;
+//#include <Button.h>
+//Button button1(2); // Connect your button between pin 2 and GND
+//Button button2(3); // Connect your button between pin 3 and GND
+//Button button3(4); // Connect your button between pin 4 and GND
+
+
+// CREATING CUSRTOMIZED STARTING SCREEN
+byte customChar0[8] = { 
+  0b00000,
+  0b00011,
+  0b00111,
+  0b01111,
+  0b01111,
+  0b01111,
+  0b01100,
+  0b01101
+};
+
+byte customChar1[8] = { 
+  0b01101,
+  0b01100,
+  0b01100,
+  0b01111,
+  0b01111,
+  0b01111,
+  0b00111,
+  0b00011
+};
+
+byte customChar2[8] = {  
+  0b11100,
+  0b11110,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b00111,
+  0b10111
+};
+byte customChar3[8] = {
+  0b10111,
+  0b00111,
+  0b00111,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b11110,
+  0b11100
+};
+byte customChar4[8] = {
+  0b00000,
+  0b00011,
+  0b00111,
+  0b01111,
+  0b01111,
+  0b01111,
+  0b01100,
+  0b01101
+};
+byte customChar5[8] = {
+  0b01101,
+  0b01100,
+  0b01100,
+  0b01111,
+  0b01111,
+  0b01111,
+  0b00111,
+  0b00011
+};
+byte customChar6[8] = {
+  0b11100,
+  0b11110,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b00111,
+  0b10111
+};
+byte customChar7[8] = {
+  0b10111,
+  0b00111,
+  0b00111,
+  0b11111,
+  0b11111,
+  0b11111,
+  0b11110,
+  0b11100
+};
+byte customChar8[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b01111,
+  0b00010,
+  0b00100,
+  0b01000,
+  0b01111
+};
+byte customChar9[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b01111,
+  0b00010,
+  0b00100,
+  0b01000,
+  0b01111
+};
+byte customChar10[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b01111,
+  0b00010,
+  0b00100,
+  0b01000,
+  0b01111
+};
+byte customChar11[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b01111,
+  0b00010,
+  0b00100,
+  0b01000,
+  0b01111
+};
+byte customChar12[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b01111,
+  0b00010,
+  0b00100,
+  0b01000,
+  0b01111
+};
+byte customChar13[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b01111,
+  0b00010,
+  0b00100,
+  0b01000,
+  0b01111
+};
+byte customChar14[8] = {
+  0b00000,
+  0b00000,
+  0b00000,
+  0b01111,
+  0b00010,
+  0b00100,
+  0b01000,
+  0b01111
+};
 
 
 void setup(){
   
-  lcd.begin(16,2);
-  pinMode(trigPin, OUTPUT);
-  pinMode(echoPin, INPUT);
-
-  Serial.begin(9600);
-}
-
-void loop() {
-  
-  digitalWrite(trigPin, LOW);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, HIGH);
-  delayMicroseconds(2);
-  digitalWrite(trigPin, LOW);
- 
-  duration =pulseIn(echoPin, HIGH);    
-
- 
-  distance = duration*0.034/2;
-  distancein = distance*0.3937;     //1cm = 0.3937in
-
-  //displaying distance to LCD
+//INITIALIZE LCD SCREEN
+  lcd.init();
+  lcd.backlight();
   lcd.clear();
-  lcd.print("Distance:");
-  lcd.print(distance);
-  lcd.print("cm");
-  lcd.setCursor(10,1);
-  lcd.print(distancein);
-  lcd.print("in");
-  delay(100);
-  pinMode(trigPin, OUTPUT);               
-  digitalWrite(trigPin, LOW);
-
-}
   
+  //SETTING UP ULTRASONIC SENSOR
+  
+Serial.begin(115200);
+mysensor.attach(7,8);
+
+
+//MPRLS 25PSI PRESSURE SENSOR
+
+Serial.println("MPRLS Simple Test");
+  if (! mpr.begin()) {
+    Serial.println("Failed to communicate with MPRLS sensor, check wiring?");
+    while (1) {
+      delay(10);
+    }
+  }
+Serial.println("Found MPRLS sensor");
+
+//PUSH BUTTONS
+
+  pinMode(upButton, INPUT_PULLUP);
+  pinMode(downButton, INPUT_PULLUP);
+  pinMode(selectButton, INPUT_PULLUP);
+  updateMenu();
+//  Serial.begin(115200);
+//  mysensor.attach(7,8);
+
+//button1.begin();
+//button2.begin();
+//button3.begin();
+
+//INITIALIZING STARTING SCREEN
+
+lcd.createChar(0, customChar0); // create a new custom character (index 0)
+lcd.createChar(1, customChar1); // create a new custom character (index 1)
+lcd.createChar(2, customChar2); // create a new custom character (index 2)
+lcd.createChar(3, customChar3);
+lcd.createChar(4, customChar4);
+lcd.createChar(5, customChar5);
+lcd.createChar(6, customChar6);
+lcd.createChar(7, customChar7);
+//lcd.createChar(9, customChar9);
+  
+lcd.setCursor(4, 0); // move cursor to (2, 0)
+lcd.write((byte)0);  // print the custom char 0 at (2, 0)
+
+lcd.setCursor(4, 1); // move cursor to (4, 0)
+lcd.write((byte)1);  // print the custom char 1 at (4, 0)
+
+lcd.setCursor(5, 0); // move cursor to (6, 0)
+lcd.write((byte)2);  // print the custom char 2 at (6, 0)
+  
+lcd.setCursor(5, 1); 
+lcd.write((byte)3);
+  
+lcd.setCursor(10, 0); 
+lcd.write((byte) 4);
+  
+lcd.setCursor(10, 1); 
+lcd.write((byte) 5);
+  
+lcd.setCursor(11, 0); 
+lcd.write((byte) 6);
+  
+  //lcd.setCursor(9, 0); 
+  //lcd.write((byte) 1);
+  
+lcd.setCursor(11, 1); 
+lcd.write((byte) 7);
+  
+  //lcd.setCursor(11, 0); 
+  //lcd.write((byte) 8);
+  delay(1000);
+}
+
+void loop(){
+
+// Pressure sensor 25PSI
+float pressure_hPa =mpr.readPressure();
+float pressure_PSI=pressure_hPa / 68.947572932;
+Serial.print(pressure_PSI);
+
+
+  
+//READINGS FROM ULTRASONIC SENSOR
+reading=mysensor.distanceInCm();
+//*** conversion to percentage by setting a reference point
+//max distance = 6.25 inches,
+// x= sensor reading (cm)
+// conversion: x/(max distance)*100///****
+
+float reading_percentage=(reading/15.875)*100;
+Serial.print("Sensor Reading :");Serial.print(reading_percentage);Serial.println("%");
+Serial.print((reading)/2.54);Serial.println("in");              
+  
+  //****reading values from pressure sensor 100PSI
+int sensorVal=analogRead(A0);
+ 
+//Converting voltage to pressure value (NEEDS CALIBRATION)
+
+float voltage = sensorVal*5.0/1024.0;
+float pressure_pascal = (3.0*((float)voltage-0.47))*1000000.0;
+float pressure_psi = pressure_pascal*(1.45038*10e-4);
+
+// **** readings/outputs  from buttons
+ reading=mysensor.distanceInInch();
+ reading_percentage=(reading/15.875)*100;
+      
+  if (!digitalRead(downButton)){
+    menu++;
+    updateMenu();
+//    delay(100);
+    while (!digitalRead(downButton));
+  }
+  if (!digitalRead(upButton)){
+    menu--;
+    updateMenu();
+//    delay(100);
+    while(!digitalRead(upButton));
+  }
+  if (!digitalRead(selectButton)){
+    executeAction();
+    updateMenu();
+//    delay(100);
+    while (!digitalRead(selectButton));
+  }
+  
+//if(button1.pressed()){
+//    lcd.setCursor(0,0);
+//    lcd.print("THE PRESSURE IS: ");
+//    lcd.setCursor(0,1);
+//    lcd.print(pressure_hPa / 68.947572932);lcd.print(" PSI        ");
+//  }
+//else while(button2.pressed()){
+//    lcd.setCursor(0,0);
+//    lcd.print("THE TEMP IS:      ");
+//    lcd.setCursor(0,1);
+//    lcd.print(reading_percentage);lcd.print(" %             ");
+//  }
+//  if (button3.pressed()) {
+//    digitalWrite(button3, LOW);
+//    lcd.setCursor(0,0);
+//    lcd.print("THE WATER LEVEL IS: ");
+//    lcd.setCursor(0,1);
+//    lcd.print(reading_percentage);lcd.print(" %             ");
+    
+//  }
+}
+void updateMenu() {
+  switch (menu) {
+    case 0:
+      menu = 1;
+      break;
+    case 1:
+      lcd.clear();
+      lcd.print(">MenuItem1");
+      lcd.setCursor(0, 1);
+      lcd.print(" MenuItem2");
+      break;
+    case 2:
+      lcd.clear();
+      lcd.print(" MenuItem1");
+      lcd.setCursor(0, 1);
+      lcd.print(">MenuItem2");
+      break;
+    case 3:
+      lcd.clear();
+      lcd.print(">MenuItem3");
+      lcd.setCursor(0, 1);
+      lcd.print(" MenuItem4");
+      break;
+    case 4:
+      lcd.clear();
+      lcd.print(" MenuItem3");
+      lcd.setCursor(0, 1);
+      lcd.print(">MenuItem4");
+      break;
+    case 5:
+      menu = 4;
+      break;
+  }
+}
+
+void executeAction() {
+  switch (menu) {
+    case 1:
+      action1();
+      break;
+    case 2:
+      action2();
+      break;
+    case 3:
+      action3();
+      break;
+    case 4:
+      action4();
+      break;
+  }
+}
+
+void action1() {
+  lcd.clear();
+  lcd.setCursor(0,0);lcd.print("Distance: ");
+  lcd.setCursor(0,1);
+  lcd.print(reading_percentage);lcd.print("%");
+  delay(1000);
+}
+void action2() {
+  lcd.clear();
+  lcd.print(">Executing #2");
+  delay(1000);
+  }
+void action3() {
+  lcd.clear();
+  lcd.print(">Executing #3");
+  delay(1500);
+}
+void action4() {
+  lcd.clear();
+  lcd.print(">Executing #4");
+  delay(1500);
+}
