@@ -1,0 +1,83 @@
+#include "DFRobot_OxygenSensor.h"  //library for oxgyensensor
+
+
+#include <NewPing.h>
+#include<UltraDistSensor.h> //library for ultra distance
+
+#define COLLECT_NUMBER    10             // collect number, the collection range is 1-100.
+#define Oxygen_IICAddress ADDRESS_2
+
+#include <Adafruit_MPRLS.h> //library for 25psi
+
+//25PSI
+#define RESET_PIN  -1 
+#define EOC_PIN    -1  
+Adafruit_MPRLS mpr = Adafruit_MPRLS(RESET_PIN, EOC_PIN);
+
+
+//UltraDistance
+UltraDistSensor mysensor;
+float reading;
+float reading_percentage;
+
+
+//Oxgyen Sensor
+DFRobot_OxygenSensor Oxygen;
+float oxygenData;
+
+
+void setup()
+{
+  //MPRLS 25PSI PRESSURE SENSOR
+
+Serial.println("MPRLS Simple Test"); 
+  if (! mpr.begin()) {
+    Serial.println("Failed to communicate with MPRLS sensor, check wiring?");
+    while (1) {
+      delay(10);
+    }
+  }
+Serial.println("Found MPRLS sensor");
+
+//ultradistance
+  Serial.begin(115200);
+mysensor.attach(7,8); 
+
+//Oxygen_sensor
+  Serial.begin(9600);
+  while(!Oxygen.begin(Oxygen_IICAddress)) {
+    Serial.println("I2c device number error !");
+    delay(1000);
+  }
+  Serial.println("I2c connect success !");
+}
+
+void loop()
+{
+  //Reading from 25PSI
+
+  
+float pressure_hPa =mpr.readPressure();
+float pressure_PSI=pressure_hPa / 68.947572932;
+Serial.print(pressure_PSI);
+
+
+  //READINGS FROM ULTRASONIC SENSOR
+reading=mysensor.distanceInCm();
+
+//// conversion to percentage by setting a reference point
+//max distance = 6.25 inches,
+// x= sensor reading (cm)
+// conversion: x/(max distance)*100
+
+float reading_percentage=(reading/15.875)*100;
+Serial.print("Sensor Reading :");Serial.print(reading_percentage);Serial.println("%");
+Serial.print((reading)/2.54);Serial.println("in");
+
+//Reading from OXgyen_Sensor
+ oxygenData = Oxygen.getOxygenData(COLLECT_NUMBER);
+  Serial.print(" Oxygen concentration is ");
+  Serial.print(oxygenData);
+  Serial.println(" %vol");
+  delay(1000);
+}
