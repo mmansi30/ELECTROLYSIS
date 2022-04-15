@@ -1,18 +1,25 @@
-int Relaypin= 3; // Define input pin for relay
-int push=2; //connect output to push button
+
+/*const int BUTTON_PIN = 2; // Arduino pin connected to button's pin
+const int RELAY_PIN  = 3; // Arduino pin connected to relay's pin
 
 void setup() {
-  // put your setup code here, to run once:
-  pinMode(push, INPUT)
-pinMode(Relaypin, OUTPUT); // Define the Relaypin as output pin
+  Serial.begin(9600);                // initialize serial
+  pinMode(BUTTON_PIN, INPUT_PULLUP); // set arduino pin to input pull-up mode
+  pinMode(RELAY_PIN, OUTPUT);        // set arduino pin to output mode
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  if(push==high){
-digitalWrite(Relaypin, HIGH); // Sends high signal 
-}
+  int buttonState = digitalRead(BUTTON_PIN); // read new state
 
-digitalWrite(Relaypin, LOW); // Makes the signal low
-
-}
+  if (buttonState == LOW) {
+    Serial.println("The button is being pressed");
+    digitalWrite(RELAY_PIN, HIGH); // turn on
+    delay(12000);
+  }
+  else
+  if (buttonState == HIGH) {
+    Serial.println("The button is unpressed");
+    digitalWrite(RELAY_PIN, LOW);  // turn off
+    delay(1000);
+  }
+}*/
