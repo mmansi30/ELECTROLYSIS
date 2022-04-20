@@ -1,83 +1,123 @@
-#include "DFRobot_OxygenSensor.h"  //library for oxgyensensor
+//Including necessary libraries
 
+// Oxygen Sensor Libraries
 
-#include <NewPing.h>
-#include<UltraDistSensor.h> //library for ultra distance
-
+#include <DFRobot_OxygenSensor.h>
 #define COLLECT_NUMBER    10             // collect number, the collection range is 1-100.
 #define Oxygen_IICAddress ADDRESS_2
-
-#include <Adafruit_MPRLS.h> //library for 25psi
-
-//25PSI
-#define RESET_PIN  -1 
-#define EOC_PIN    -1  
-Adafruit_MPRLS mpr = Adafruit_MPRLS(RESET_PIN, EOC_PIN);
-
-
-//UltraDistance
-UltraDistSensor mysensor;
-float reading;
-float reading_percentage;
-
-
-//Oxgyen Sensor
 DFRobot_OxygenSensor Oxygen;
 float oxygenData;
 
 
-void setup()
-{
-  //MPRLS 25PSI PRESSURE SENSOR
+//////MPRLS 25PSI SENSOR
 
-Serial.println("MPRLS Simple Test"); 
-  if (! mpr.begin()) {
-    Serial.println("Failed to communicate with MPRLS sensor, check wiring?");
-    while (1) {
-      delay(10);
-    }
-  }
-Serial.println("Found MPRLS sensor");
+//#include <Adafruit_MPRLS.h>
+//#define RESET_PIN  -1 
+//#define EOC_PIN    -1  
+//Adafruit_MPRLS mpr = Adafruit_MPRLS(RESET_PIN, EOC_PIN);
+//float pressure_hPa;
+//float pressure_PSI;
 
-//ultradistance
-  Serial.begin(115200);
-mysensor.attach(7,8); 
+//Pressure Sensor 100PSI
 
-//Oxygen_sensor
-  Serial.begin(9600);
+float voltage;
+float pressure_pascal;
+float pressure_psi;
+
+//ULTRASONIC SENSOR
+
+#include <NewPing.h>
+#include<UltraDistSensor.h>
+UltraDistSensor mysensor;
+float reading;
+float reading_percentage;
+float max_distance;
+
+
+void setup(){
+  
+Serial.begin(9600);
+
+// ULTRASONIC SENSOR
+mysensor.attach(7,8);
+
+
+//MPRLS 25PSI PRESSURE SENSOR
+
+//Serial.println("MPRLS Simple Test");
+//  if (! mpr.begin()) {
+//    Serial.println("Failed to communicate with MPRLS sensor, check wiring?");
+//    while (1) {
+//      delay(10);
+//    }
+//  }
+//Serial.println("Found MPRLS sensor");
+
+// Oxygen Sensor 
+  Serial.println("waiting");
   while(!Oxygen.begin(Oxygen_IICAddress)) {
     Serial.println("I2c device number error !");
-    delay(1000);
+    delay(3000);
   }
   Serial.println("I2c connect success !");
+
 }
 
-void loop()
-{
-  //Reading from 25PSI
+
+void loop(){
+ 
+
+// Pressure sensor 25PSI
+//pressure_hPa =mpr.readPressure();
+//pressure_PSI=pressure_hPa / 68.947572932;
+//Serial.print(pressure_PSI);
+
 
   
-float pressure_hPa =mpr.readPressure();
-float pressure_PSI=pressure_hPa / 68.947572932;
-Serial.print(pressure_PSI);
+//READINGS FROM ULTRASONIC SENSOR
 
+reading=mysensor.distanceInInch();
+//*** conversion to percentage by setting a reference point
 
-  //READINGS FROM ULTRASONIC SENSOR
-reading=mysensor.distanceInCm();
+max_distance = 6.25;
 
-//// conversion to percentage by setting a reference point
-//max distance = 6.25 inches,
 // x= sensor reading (cm)
-// conversion: x/(max distance)*100
 
-float reading_percentage=(reading/15.875)*100;
-Serial.print("Sensor Reading :");Serial.print(reading_percentage);Serial.println("%");
-Serial.print((reading)/2.54);Serial.println("in");
+// conversion: x/(max distance)*100///****
 
-//Reading from OXgyen_Sensor
- oxygenData = Oxygen.getOxygenData(COLLECT_NUMBER);
-  Serial.print(" Oxygen concentration is ");
-  Serial.print(oxygenData);
-  Serial.println(" %vol");
-  delay(1000);
+reading_percentage=(reading/max_distance)*100;
+Serial.println("\t");
+Serial.print("DISTANCE (in): ");
+Serial.print(reading, 4);
+Serial.print(" in");
+Serial.println("\t");
+Serial.print("DISTANCE (%): ");
+Serial.print(reading_percentage);
+Serial.print(" %");
+Serial.println("\t");             
+  
+  //****reading values from pressure sensor 100PSI
+int sensorVal=analogRead(A0);
+float voltage = (sensorVal*5.0)/1023.5;
+//    Serial.print("Volts: ");
+//    Serial.print(voltage);
+   
+  float pressure_pascal = (3.0*((float)voltage-0.47))*1000000.0;
+  float pressure_bar = pressure_pascal/10e5;
+    Serial.print("Pressure = ");
+    Serial.print(pressure_bar);
+    Serial.print(" bars");
+    Serial.println("\t");
+
+//Oxygen Sensor
+
+oxygenData = Oxygen.getOxygenData(COLLECT_NUMBER);
+Serial.print("Oxygen concentration is: ");
+Serial.print(oxygenData);
+Serial.print(" %vol");
+Serial.println("\t");
+delay(5000);
+      
+
 }
+
