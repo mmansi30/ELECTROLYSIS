@@ -96,17 +96,18 @@ Serial.print(reading_percentage);
 Serial.print(" %");
 Serial.println("\t");             
   
-  //****reading values from pressure sensor 100PSI
+  //****reading values from pressure sensor 100PSI 
+  //*****NEEDS CALIBRATION
+  
 int sensorVal=analogRead(A0);
 float voltage = (sensorVal*5.0)/1023.5;
 //    Serial.print("Volts: ");
 //    Serial.print(voltage);
    
-  float pressure_pascal = (3.0*((float)voltage-0.47))*1000000.0;
-  float pressure_bar = pressure_pascal/10e5;
+  float pressure_psi = ((voltage+0.445)*21.95);
     Serial.print("Pressure = ");
-    Serial.print(pressure_bar);
-    Serial.print(" bars");
+    Serial.print(pressure_psi);
+    Serial.print(" psi");
     Serial.println("\t");
 
 //Oxygen Sensor
@@ -116,7 +117,7 @@ Serial.print("Oxygen concentration is: ");
 Serial.print(oxygenData);
 Serial.print(" %vol");
 Serial.println("\t");
-delay(5000);
+delay(1000);
       
 
 }
