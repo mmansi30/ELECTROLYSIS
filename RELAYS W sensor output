@@ -1,0 +1,122 @@
+//Including necessary libraries
+
+// Oxygen Sensor Libraries
+
+#include <DFRobot_OxygenSensor.h>
+#define COLLECT_NUMBER    10             // collect number, the collection range is 1-100.
+#define Oxygen_IICAddress ADDRESS_2
+DFRobot_OxygenSensor Oxygen;
+float oxygenData;
+int Liquid_level=0;
+const int LEVEL=5;
+
+//RELAY
+const int RELAY1  = 3; // Arduino pin connected to relay's pin
+const int RELAY2 = 4;
+
+//////MPRLS 25PSI SENSOR
+
+//#include <Adafruit_MPRLS.h>
+//#define RESET_PIN  -1 
+//#define EOC_PIN    -1  
+//Adafruit_MPRLS mpr = Adafruit_MPRLS(RESET_PIN, EOC_PIN);
+//float pressure_hPa;
+//float pressure_PSI;
+
+//Pressure Sensor 100PSI
+
+float voltage;
+float pressure_pascal;
+float pressure_psi;
+
+void setup(){
+  
+Serial.begin(9600);
+//RELAY
+ pinMode(RELAY1, OUTPUT);        // set arduino pin to output mode
+ pinMode(RELAY2, OUTPUT);
+ pinMode(LEVEL,INPUT);
+ 
+//MPRLS 25PSI PRESSURE SENSOR
+
+//Serial.println("MPRLS Simple Test");
+//  if (! mpr.begin()) {
+//    Serial.println("Failed to communicate with MPRLS sensor, check wiring?");
+//    while (1) {
+//      delay(10);
+//    }
+//  }
+//Serial.println("Found MPRLS sensor");
+
+// Oxygen Sensor 
+  Serial.println("waiting");
+  while(!Oxygen.begin(Oxygen_IICAddress)) {
+    Serial.println("I2c device number error !");
+    delay(3000);
+  }
+  Serial.println("I2c connect success !");
+
+}
+
+
+void loop(){
+  oxygen();
+  pressure();
+  level();
+// Pressure sensor 25PSI
+//pressure_hPa =mpr.readPressure();
+//pressure_PSI=pressure_hPa / 68.947572932;
+//Serial.print(pressure_PSI);
+}
+
+//reading values and controlling relay based of oxygen sensor
+void oxygen(){  
+  
+oxygenData = Oxygen.getOxygenData(COLLECT_NUMBER);
+Serial.print("Oxygen concentration is: ");
+Serial.print(oxygenData);
+Serial.print(" %vol");
+Serial.println("\t");
+delay(2000);
+
+if (oxygenData >= 21){
+  digitalWrite(RELAY1, HIGH);
+}
+  else
+    if(oxygenData <= 21){
+    digitalWrite(RELAY1, LOW);
+  }
+}
+
+
+//reading values and controlling relay based of pressure sensor
+
+void pressure(){
+
+int sensorVal=analogRead(A0);
+float voltage = (sensorVal*5.0)/1023.5;
+//    Serial.print("Volts: ");
+//    Serial.print(voltage);
+   
+  float pressure_psi = ((voltage+0.445)*21.95);
+    Serial.print("Pressure = ");
+    Serial.print(pressure_psi);
+    Serial.print(" psi");
+    Serial.println("\t");
+    delay(5000);
+    
+if (pressure_psi >= 20){
+  digitalWrite(RELAY2, LOW);
+  }
+    else
+      if (pressure_psi <=20){
+        digitalWrite(RELAY2, HIGH);
+  }
+}
+
+void level(){
+Liquid_level=digitalRead(5);
+Serial.print("liquid level= ");
+Serial.println(Liquid_level, DEC);
+delay(1000);
+}
