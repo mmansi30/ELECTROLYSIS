@@ -1,0 +1,27 @@
+
+int Relaypin2= 5;
+int Liquid_level=0;
+
+void setup() {
+  // put your setup code here, to run once:
+  Serial.begin(9600);
+ pinMode(7,INPUT);
+pinMode(Relaypin2, OUTPUT);// Define the Relaypin as output pin
+}
+
+void loop() {
+  // put your main code here, to run repeatedly:
+  
+Liquid_level=digitalRead(7);
+Serial.print("Liquid_level= ");
+Serial.println(Liquid_level,DEC);
+if (Liquid_level == 01){
+digitalWrite(Relaypin2, HIGH); // Sends high signal 
+//delay(1000); // Waits for 1 second
+}
+  else 
+    if (Liquid_level == 0){
+    digitalWrite(Relaypin2, LOW); // Makes the signal low
+//    delay(1000); // Waits for 1 second
+}
+}
