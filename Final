@@ -1,9 +1,11 @@
+
+   
 #include "DFRobot_OxygenSensor.h"
 
 #define COLLECT_NUMBER    10             // collect number, the collection range is 1-100.
 #define Oxygen_IICAddress ADDRESS_2
 
-#define LED 12
+
 
 int Relaypin1= 3;
 int Relaypin2= 2;
@@ -19,8 +21,10 @@ DFRobot_OxygenSensor Oxygen;
 void setup() 
 {
   Serial.begin(9600);
-  pinMode(LED, OUTPUT);
-   pinMode(7,INPUT);
+  
+  pinMode(7, OUTPUT); //REDled
+  pinMode(8,OUTPUT); //Greenled
+   
 pinMode(Relaypin1, OUTPUT);
 pinMode(Relaypin2, OUTPUT);
   while(!Oxygen.begin(Oxygen_IICAddress)) {
@@ -36,38 +40,41 @@ void loop()
   delay(500);
   digitalWrite(Relaypin1, LOW);
   delay(500);
-//  float oxygenData = Oxygen.getOxygenData(COLLECT_NUMBER);
-//  Serial.print(" Oxygen concentration is ");
-//  Serial.print(oxygenData);
-//  Serial.println(" %vol");
-//  delay(10000);
-// if (oxygenData <= 10){
-//    Serial.print("Ready to extract the Hydrogen");
-//    Serial.println();
-//    delay(1000);
-// }
-//    else
-//      if(oxygenData > 10){
-//    
-//      Serial.print("Waiting........");
-//      Serial.println();
-//      delay(1000);
-//    }
-// 
-//Liquid_level=digitalRead(4);
-//if (Liquid_level == 0){
-//digitalWrite(Relaypin1, HIGH); // Sends high signal 
-//Serial.print("WATER IS low");
-//Serial.println();
-//delay(1000);
-//}
-//  else 
-//    if (Liquid_level == 01){
-//    digitalWrite(Relaypin1, LOW);
-//    Serial.print("WATER IS ENOUGH");// Makes the signal low
-//    Serial.println();
-//}
-//delay(1000);
+ float oxygenData = Oxygen.getOxygenData(COLLECT_NUMBER);
+  Serial.print(" Oxygen concentration is ");
+  Serial.print(oxygenData);
+  Serial.println(" %vol");
+  delay(10000);
+ if (oxygenData <= 10){
+    digitalWrite(8,HIGH);
+    digitalWrite(7,LOW);
+    Serial.print("Ready to extract the Hydrogen");
+    Serial.println();
+    delay(1000);
+ }
+    else
+      if(oxygenData > 10){
+      digitalWrite(7,HIGH);
+      digitalWrite(8,LOW);
+      Serial.print("Waiting........");
+      Serial.println();
+      delay(1000);
+    }
+ 
+Liquid_level=digitalRead(4);
+if (Liquid_level == 0){
+digitalWrite(Relaypin1, HIGH); // Sends high signal 
+Serial.print("WATER IS low");
+Serial.println();
+delay(1000);
+}
+  else 
+    if (Liquid_level == 01){
+    digitalWrite(Relaypin1, LOW);
+    Serial.print("WATER IS ENOUGH");// Makes the signal low
+    Serial.println();
+}
+delay(1000);
 
 //reading values and controlling relay based of pressure sensor
 
